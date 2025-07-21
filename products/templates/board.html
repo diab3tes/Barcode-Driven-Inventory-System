@@ -84,347 +84,331 @@
 <body>
   <div id="app"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect } = React;
+<script type="text/babel">
+  const { useState, useEffect } = React;
 
-    const BarcodeScanner = ({ onScanned, onClose }) => {
-      const [scanning, setScanning] = useState(false);
+  const BarcodeScanner = ({ onScanned, onClose }) => {
+    const [scanning, setScanning] = useState(false);
 
-      const startRealScanning = async () => {
-        try {
-          const scanner = new Html5Qrcode("qr-reader");
-          await scanner.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 250, height: 250 } },
-            (decodedText) => {
-              scanner.stop();
-              onScanned(decodedText);
-            }
-          );
-        } catch (err) {
-          console.error("Camera access denied:", err);
-          alert("Camera access required for barcode scanning");
-        }
-      };
-
-      const simulateScan = () => {
-        setScanning(true);
-        setTimeout(() => {
-          const mockBarcode = Math.floor(Math.random() * 1000000000).toString();
-          onScanned(mockBarcode);
-          setScanning(false);
-        }, 1500);
-      };
-
-      return (
-        <div className="modal">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3 className="modal-title">Scan Barcode</h3>
-              <button className="close-btn" onClick={onClose}>&times;</button>
-            </div>
-            <div className="scanner-content">
-              <div className="scanner-icon">📷</div>
-              <p className="style-one">
-                Position the barcode within the camera view
-              </p>
-              <div id="qr-reader" ></div>
-              <div className="scanner-buttons">
-                <button
-                  className="btn btn-primary"
-                  onClick={simulateScan}
-                  disabled={scanning}
-                >
-                  {scanning ? <span className="loading"></span> : '📱'}
-                  {scanning ? 'Scanning...' : 'Simulate Scan (Demo)'}
-                </button>
-                <button className="btn btn-success" onClick={startRealScanning}>
-                  📷 Use Real Camera
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    };
-
-    const NewCategoryModal = ({ onAdd, onClose }) => {
-      const [categoryName, setCategoryName] = useState('');
-
-      const handleAdd = () => {
-        if (categoryName.trim()) {
-          onAdd(categoryName.trim());
-          setCategoryName('');
-          onClose();
-        }
-      };
-
-      return (
-        <div className="modal">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3 className="modal-title">Add New Category</h3>
-              <button className="close-btn" onClick={onClose}>&times;</button>
-            </div>
-            <div className="form-group">
-              <input
-                type="text"
-                className="form-input"
-                placeholder="Category name"
-                value={categoryName}
-                onChange={(e) => setCategoryName(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleAdd()}
-              />
-            </div>
-            <div className="form-actions">
-              <button className="btn btn-success" onClick={handleAdd}>
-                ✅ Add Category
-              </button>
-              <button className="btn btn-secondary" onClick={onClose}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    };
-
-    const ProductCard = ({ product, categories, onCategoryChange, onDragStart }) => {
-      return (
-        <div
-          className="card"
-          draggable
-          onDragStart={(e) => onDragStart(e, product)}
-        >
-          <div className="card-content">
-            <img
-              src={product.image || `https://via.placeholder.com/60x60?text=${product.name.slice(0,2)}`}
-              alt={product.name}
-              className="card-image"
-              onError={(e) => {
-                e.target.src = `https://via.placeholder.com/60x60?text=No+Img`;
-              }}
-            />
-            <div className="card-info">
-              <div className="card-name">{product.name}</div>
-              <div className="card-barcode">{product.barcode}</div>
-              <select
-                className="card-select"
-                value={product.category}
-                onChange={(e) => onCategoryChange(product.barcode, e.target.value)}
-              >
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      );
-    };
-
-    const KanbanBoard = () => {
-      const [products, setProducts] = useState([]);
-      const [categories, setCategories] = useState(['Uncategorized']);
-      const [showScanner, setShowScanner] = useState(false);
-      const [showNewCategory, setShowNewCategory] = useState(false);
-      const [loading, setLoading] = useState(false);
-      const [error, setError] = useState('');
-      const [draggedItem, setDraggedItem] = useState(null);
-
-      // Initialize with sample data
-      useEffect(() => {
-        const sampleProducts = [
-          {
-            barcode: '123456789',
-            name: 'Sample Product 1',
-            image: 'https://via.placeholder.com/100x100?text=Product+1',
-            category: 'Uncategorized'
+    const startRealScanning = async () => {
+      try {
+        const scanner = new Html5Qrcode("qr-reader");
+        await scanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          (decodedText) => {
+            scanner.stop();
+            onScanned(decodedText);
           }
-        ];
-        setProducts(sampleProducts);
-      }, []);
+        );
+      } catch (err) {
+        console.error("Camera access denied:", err);
+        alert("Camera access required for barcode scanning");
+      }
+    };
 
-      // API functions (replace with real Django API calls)
-      const fetchProductByBarcode = async (barcode) => {
+    const simulateScan = () => {
+      setScanning(true);
+      setTimeout(() => {
+        const mockBarcode = Math.floor(Math.random() * 1000000000).toString();
+        onScanned(mockBarcode);
+        setScanning(false);
+      }, 1500);
+    };
+
+    return (
+      <div className="modal">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h3 className="modal-title">Scan Barcode</h3>
+            <button className="close-btn" onClick={onClose}>&times;</button>
+          </div>
+          <div className="scanner-content">
+            <div className="scanner-icon">📷</div>
+            <p className="style-one">Position the barcode within the camera view</p>
+            <div id="qr-reader"></div>
+            <div className="scanner-buttons">
+              <button
+                className="btn btn-primary"
+                onClick={simulateScan}
+                disabled={scanning}
+              >
+                {scanning ? <span className="loading"></span> : '📱'}
+                {scanning ? 'Scanning...' : 'Simulate Scan (Demo)'}
+              </button>
+              <button className="btn btn-success" onClick={startRealScanning}>
+                📷 Use Real Camera
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const NewCategoryModal = ({ onAdd, onClose }) => {
+    const [categoryName, setCategoryName] = useState('');
+
+    const handleAdd = () => {
+      if (categoryName.trim()) {
+        onAdd(categoryName.trim());
+        setCategoryName('');
+        onClose();
+      }
+    };
+
+    return (
+      <div className="modal">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h3 className="modal-title">Add New Category</h3>
+            <button className="close-btn" onClick={onClose}>&times;</button>
+          </div>
+          <div className="form-group">
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Category name"
+              value={categoryName}
+              onChange={(e) => setCategoryName(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleAdd()}
+            />
+          </div>
+          <div className="form-actions">
+            <button className="btn btn-success" onClick={handleAdd}>
+              ✅ Add Category
+            </button>
+            <button className="btn btn-secondary" onClick={onClose}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const ProductCard = ({ product, categories, onCategoryChange, onDragStart }) => {
+    const shortText = product.description ? product.description.slice(0, 2) : 'NA';
+    return (
+      <div
+        className="card"
+        draggable
+        onDragStart={(e) => onDragStart(e, product)}
+      >
+        <div className="card-content">
+          <img
+            src={product.image || `https://us.123rf.com/450wm/muslumstock/muslumstock1811/muslumstock181109632/112693281-product-icon-black-filled-vector-illustration-product-symbol-on-white-background-can-be-used-in.jpg?ver=6`}
+            alt={product.description || 'No description'}
+            className="card-image"
+            onError={(e) => {
+              e.target.src = `https://us.123rf.com/450wm/muslumstock/muslumstock1811/muslumstock181109632/112693281-product-icon-black-filled-vector-illustration-product-symbol-on-white-background-can-be-used-in.jpg?ver=6`;
+            }}
+          />
+          <div className="card-info">
+            <div className="card-name">{product.description || 'Unnamed Product'}</div>
+            <div className="card-barcode">{product.barcode}</div>
+            <select
+              className="card-select"
+              value={product.category}
+              onChange={(e) => onCategoryChange(product.barcode, e.target.value)}
+            >
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const KanbanBoard = () => {
+    const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState(['Uncategorized']);
+    const [showScanner, setShowScanner] = useState(false);
+    const [showNewCategory, setShowNewCategory] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [draggedItem, setDraggedItem] = useState(null);
+
+    useEffect(() => {
+      const fetchAllProducts = async () => {
         setLoading(true);
         try {
-          // Replace with: const response = await axios.get(`https://products-test-aci.onrender.com/product/${barcode}`);
-          await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API delay
+          const response = await fetch(`http://localhost:8011/api/products`);
+          const data = await response.json();
+          setProducts(data);
 
-          const newProduct = {
-            barcode: barcode,
-            name: `Product ${barcode.slice(0, 6)}`,
-            image: `https://via.placeholder.com/100x100?text=${barcode.slice(0,3)}`,
-            category: 'Uncategorized'
-          };
-
-          // Add to database via Django API
-          // await axios.post('/api/products/add', newProduct);
-
-          setProducts(prev => [...prev, newProduct]);
-          setError('');
+          const uniqueCategories = Array.from(new Set(data.map(p => p.category || 'Uncategorized')));
+          setCategories(['Uncategorized', ...uniqueCategories.filter(c => c !== 'Uncategorized')]);
         } catch (err) {
-          setError('Failed to fetch product details. Please try again.');
+          console.error(err);
+          setError('Failed to fetch products from server.');
         } finally {
           setLoading(false);
         }
       };
 
-      const updateProductCategory = async (barcode, newCategory) => {
-        try {
-          // Replace with: await axios.patch(`/api/products/${barcode}`, { category: newCategory });
-          setProducts(prev =>
-            prev.map(product =>
-              product.barcode === barcode
-                ? { ...product, category: newCategory }
-                : product
-            )
-          );
-        } catch (err) {
-          setError('Failed to update product category.');
-        }
-      };
+      fetchAllProducts();
+    }, []);
 
-      const addCategory = (categoryName) => {
-        if (!categories.includes(categoryName)) {
-          setCategories(prev => [...prev, categoryName]);
-        }
-      };
-
-      // Drag and drop handlers
-      const handleDragStart = (e, product) => {
-        setDraggedItem(product);
-        e.dataTransfer.effectAllowed = 'move';
-      };
-
-      const handleDragOver = (e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-      };
-
-      const handleDrop = (e, targetCategory) => {
-        e.preventDefault();
-        if (draggedItem && draggedItem.category !== targetCategory) {
-          updateProductCategory(draggedItem.barcode, targetCategory);
-        }
-        setDraggedItem(null);
-      };
-
-      const getProductsByCategory = (category) => {
-        return products.filter(product => product.category === category);
-      };
-
-      return (
-        <div className="container">
-          {/* Header */}
-          <div className="header">
-            <h1>📦 Product Board</h1>
-            <div className="header-actions">
-              <button
-                className="btn btn-primary"
-                onClick={() => setShowScanner(true)}
-                disabled={loading}
-              >
-                {loading ? <span className="loading"></span> : '📱'}
-                {loading ? 'Scanning...' : 'Scan Barcode'}
-              </button>
-              <button
-                className="btn btn-success"
-                onClick={() => setShowNewCategory(true)}
-              >
-                ➕ Add Category
-              </button>
-            </div>
-
-            {/* Stats */}
-            <div className="stats">
-              <div className="stat-card">
-                <div className="stat-label">Total Products</div>
-                <div className="stat-value">{products.length}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Categories</div>
-                <div className="stat-value">{categories.length}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Uncategorized</div>
-                <div className="stat-value">{getProductsByCategory('Uncategorized').length}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="error">
-              ⚠️ {error}
-              <button
-                className="style-three"
-                onClick={() => setError('')}
-              >
-                &times;
-              </button>
-            </div>
-          )}
-
-          {/* Kanban Board */}
-          <div className="board">
-            {categories.map(category => (
-              <div
-                key={category}
-                className="column"
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, category)}
-              >
-                <div className="column-header">
-                  <span className="column-title">{category}</span>
-                  <span className="column-count">{getProductsByCategory(category).length}</span>
-                </div>
-
-                <div className="style-four">
-                  {getProductsByCategory(category).map(product => (
-                    <ProductCard
-                      key={product.barcode}
-                      product={product}
-                      categories={categories}
-                      onCategoryChange={updateProductCategory}
-                      onDragStart={handleDragStart}
-                    />
-                  ))}
-
-                  {getProductsByCategory(category).length === 0 && (
-                    <div className="empty-state">
-                      <div className="empty-icon">📦</div>
-                      <p>No products in this category</p>
-                      <small>Drag products here or scan new ones</small>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Scanner Modal */}
-          {showScanner && (
-            <BarcodeScanner
-              onScanned={fetchProductByBarcode}
-              onClose={() => setShowScanner(false)}
-            />
-          )}
-
-          {/* New Category Modal */}
-          {showNewCategory && (
-            <NewCategoryModal
-              onAdd={addCategory}
-              onClose={() => setShowNewCategory(false)}
-            />
-          )}
-        </div>
-      );
+    const fetchProductByBarcode = async (barcode) => {
+      setLoading(true);
+      try {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        const newProduct = {
+          barcode: barcode,
+          description: `Product ${barcode.slice(0, 6)}`,
+          image: `https://us.123rf.com/450wm/muslumstock/muslumstock1811/muslumstock181109632/112693281-product-icon-black-filled-vector-illustration-product-symbol-on-white-background-can-be-used-in.jpg?ver=6`,
+          category: 'Uncategorized'
+        };
+        setProducts(prev => [...prev, newProduct]);
+        setError('');
+      } catch (err) {
+        setError('Failed to fetch product details. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    // Render the app
-    ReactDOM.createRoot(document.getElementById('app')).render(<KanbanBoard />);
-  </script>
+    const updateProductCategory = async (barcode, newCategory) => {
+      try {
+        setProducts(prev =>
+          prev.map(product =>
+            product.barcode === barcode
+              ? { ...product, category: newCategory }
+              : product
+          )
+        );
+      } catch (err) {
+        setError('Failed to update product category.');
+      }
+    };
+
+    const addCategory = (categoryName) => {
+      if (!categories.includes(categoryName)) {
+        setCategories(prev => [...prev, categoryName]);
+      }
+    };
+
+    const handleDragStart = (e, product) => {
+      setDraggedItem(product);
+      e.dataTransfer.effectAllowed = 'move';
+    };
+
+    const handleDragOver = (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleDrop = (e, targetCategory) => {
+      e.preventDefault();
+      if (draggedItem && draggedItem.category !== targetCategory) {
+        updateProductCategory(draggedItem.barcode, targetCategory);
+      }
+      setDraggedItem(null);
+    };
+
+    const getProductsByCategory = (category) => {
+      return products.filter(product => product.category === category);
+    };
+
+    return (
+      <div className="container">
+        <div className="header">
+          <h1>📦 Product Board</h1>
+          <div className="header-actions">
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowScanner(true)}
+              disabled={loading}
+            >
+              {loading ? <span className="loading"></span> : '📱'}
+              {loading ? 'Scanning...' : 'Scan Barcode'}
+            </button>
+            <button
+              className="btn btn-success"
+              onClick={() => setShowNewCategory(true)}
+            >
+              ➕ Add Category
+            </button>
+          </div>
+          <div className="stats">
+            <div className="stat-card">
+              <div className="stat-label">Total Products</div>
+              <div className="stat-value">{products.length}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">Categories</div>
+              <div className="stat-value">{categories.length}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">Uncategorized</div>
+              <div className="stat-value">{getProductsByCategory('Uncategorized').length}</div>
+            </div>
+          </div>
+        </div>
+
+        {error && (
+          <div className="error">
+            ⚠️ {error}
+            <button className="style-three" onClick={() => setError('')}>&times;</button>
+          </div>
+        )}
+
+        <div className="board">
+          {categories.map(category => (
+            <div
+              key={category}
+              className="column"
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, category)}
+            >
+              <div className="column-header">
+                <span className="column-title">{category}</span>
+                <span className="column-count">{getProductsByCategory(category).length}</span>
+              </div>
+              <div className="style-four">
+                {getProductsByCategory(category).map(product => (
+                  <ProductCard
+                    key={product.barcode}
+                    product={product}
+                    categories={categories}
+                    onCategoryChange={updateProductCategory}
+                    onDragStart={handleDragStart}
+                  />
+                ))}
+                {getProductsByCategory(category).length === 0 && (
+                  <div className="empty-state">
+                    <div className="empty-icon">📦</div>
+                    <p>No products in this category</p>
+                    <small>Drag products here or scan new ones</small>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {showScanner && (
+          <BarcodeScanner
+            onScanned={fetchProductByBarcode}
+            onClose={() => setShowScanner(false)}
+          />
+        )}
+
+        {showNewCategory && (
+          <NewCategoryModal
+            onAdd={addCategory}
+            onClose={() => setShowNewCategory(false)}
+          />
+        )}
+      </div>
+    );
+  };
+
+  ReactDOM.createRoot(document.getElementById('app')).render(<KanbanBoard />);
+</script>
+
 </body>
 </html>
