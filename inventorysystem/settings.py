@@ -17,9 +17,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-#dtrctd5@x*+)v52#9lry*(1&0qkgt5h3hzzcyhi@#2$$6=k7s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['barcode-driven-inventory-system.onrender.com', 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
@@ -135,6 +135,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
