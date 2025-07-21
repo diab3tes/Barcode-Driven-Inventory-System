@@ -17,7 +17,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-#dtrctd5@x*+)v52#9lry*(1&0qkgt5h3hzzcyhi@#2$$6=k7s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['barcode-driven-inventory-system.onrender.com', 'localhost', '127.0.0.1']
 

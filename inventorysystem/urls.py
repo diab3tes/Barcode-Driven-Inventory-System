@@ -17,7 +17,10 @@ Including another URLconf
 from django.urls import path
 from django.urls import include
 
+from products.views import board_page
+
 urlpatterns = [
     path('api/', include('products.urls')),
+    path('', board_page),
 ]
 

@@ -32,6 +32,7 @@ def get_products(request):
 @api_view(['POST'])
 def add_product(request):
     barcode = request.data.get('barcode')
+    # barcode = "1234567890142"
     external_url = f"https://products-test-aci.onrender.com/product/{barcode}"
     resp = requests.get(external_url).json()
     print(f'resp-> {resp}')
