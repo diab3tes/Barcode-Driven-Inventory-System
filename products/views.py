@@ -35,12 +35,15 @@ def add_product(request):
     external_url = f"https://products-test-aci.onrender.com/product/{barcode}"
     resp = requests.get(external_url).json()
     print(f'resp-> {resp}')
+    if resp.get('status') == True:
+        product_data = resp['product']
     product = Product.objects(barcode=barcode).first()
     if not product:
         product = Product(
             barcode=barcode,
-            description=resp.get('description'),
-            material=resp.get('material'),
+            name=' '.join(product_data.get('description').split()[:3]),
+            description=product_data.get('description'),
+            material=product_data.get('material'),
         )
         product.save()
     return Response({

@@ -13,7 +13,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; }
 
-    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .container { max-width: 90%; margin: 0 auto; padding: 20px; }
     .header { background: white; padding: 24px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 24px; }
     .header h1 { color: #1f2937; margin-bottom: 16px; }
     .header-actions { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -188,7 +188,6 @@
   };
 
   const ProductCard = ({ product, categories, onCategoryChange, onDragStart }) => {
-    const shortText = product.description ? product.description.slice(0, 2) : 'NA';
     return (
       <div
         className="card"
@@ -206,7 +205,8 @@
           />
           <div className="card-info">
             <div className="card-name">{product.description || 'Unnamed Product'}</div>
-            <div className="card-barcode">{product.barcode}</div>
+            <div className="card-barcode">Barcode: {product.barcode}</div>
+            <div className="card-material">Material: {product.material || 'N/A'}</div>
             <select
               className="card-select"
               value={product.category}
@@ -225,6 +225,7 @@
   const KanbanBoard = () => {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState(['Uncategorized']);
+    const [originalCategories, setOriginalCategories] = useState({});
     const [showScanner, setShowScanner] = useState(false);
     const [showNewCategory, setShowNewCategory] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -238,6 +239,12 @@
           const response = await fetch(`http://localhost:8011/api/products`);
           const data = await response.json();
           setProducts(data);
+
+          const originals = {};
+          data.forEach(p => {
+            originals[p.barcode] = p.category || 'Uncategorized';
+          });
+          setOriginalCategories(originals);
 
           const uniqueCategories = Array.from(new Set(data.map(p => p.category || 'Uncategorized')));
           setCategories(['Uncategorized', ...uniqueCategories.filter(c => c !== 'Uncategorized')]);
@@ -255,33 +262,90 @@
     const fetchProductByBarcode = async (barcode) => {
       setLoading(true);
       try {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        const newProduct = {
-          barcode: barcode,
-          description: `Product ${barcode.slice(0, 6)}`,
-          image: `https://us.123rf.com/450wm/muslumstock/muslumstock1811/muslumstock181109632/112693281-product-icon-black-filled-vector-illustration-product-symbol-on-white-background-can-be-used-in.jpg?ver=6`,
-          category: 'Uncategorized'
-        };
-        setProducts(prev => [...prev, newProduct]);
+        const res = await fetch('http://localhost:8011/api/products/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ barcode }),
+        });
+
+        if (!res.ok) throw new Error('Failed to add product');
+
+        const newProduct = await res.json();
+
+        const defaultImage = `https://us.123rf.com/450wm/muslumstock/muslumstock1811/muslumstock181109632/112693281-product-icon-black-filled-vector-illustration-product-symbol-on-white-background-can-be-used-in.jpg?ver=6`;
+
+        setProducts((prev) => {
+          const exists = prev.some(p => p.barcode === newProduct.barcode);
+          if (exists) return prev;
+
+          return [...prev, {
+            barcode: newProduct.barcode,
+            description: newProduct.description || 'Unnamed Product',
+            material: newProduct.material || null,
+            category: newProduct.category || 'Uncategorized',
+            image: newProduct.image || defaultImage,
+          }];
+        });
+
+        setOriginalCategories(prev => ({
+          ...prev,
+          [newProduct.barcode]: newProduct.category || 'Uncategorized'
+        }));
+
         setError('');
       } catch (err) {
-        setError('Failed to fetch product details. Please try again.');
+        console.error(err);
+        setError('Failed to fetch/add product. Try again.');
       } finally {
         setLoading(false);
       }
     };
 
-    const updateProductCategory = async (barcode, newCategory) => {
-      try {
-        setProducts(prev =>
-          prev.map(product =>
-            product.barcode === barcode
-              ? { ...product, category: newCategory }
-              : product
-          )
-        );
-      } catch (err) {
-        setError('Failed to update product category.');
+    const updateProductCategory = (barcode, newCategory) => {
+      setProducts(prev =>
+        prev.map(product =>
+          product.barcode === barcode
+            ? { ...product, category: newCategory }
+            : product
+        )
+      );
+    };
+
+    const handleUpdateCategories = async () => {
+      setLoading(true);
+      let updates = 0;
+
+      for (const product of products) {
+        const original = originalCategories[product.barcode] || 'Uncategorized';
+        if (product.category !== original) {
+          try {
+            const res = await fetch(`http://localhost:8011/api/products/${product.barcode}`, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ category: product.category }),
+            });
+
+            if (res.ok) {
+              updates += 1;
+              originalCategories[product.barcode] = product.category;
+            } else {
+              console.error(`Failed to update ${product.barcode}`);
+            }
+          } catch (err) {
+            console.error(`Error updating ${product.barcode}:`, err);
+          }
+        }
+      }
+
+      setLoading(false);
+      if (updates > 0) {
+        alert(`${updates} product(s) updated successfully.`);
+      } else {
+        alert('No changes to update.');
       }
     };
 
@@ -331,6 +395,13 @@
               onClick={() => setShowNewCategory(true)}
             >
               ➕ Add Category
+            </button>
+            <button
+              className="btn btn-warning"
+              onClick={handleUpdateCategories}
+              disabled={loading}
+            >
+              🔄 Update Changes
             </button>
           </div>
           <div className="stats">
@@ -409,6 +480,8 @@
 
   ReactDOM.createRoot(document.getElementById('app')).render(<KanbanBoard />);
 </script>
+
+
 
 </body>
 </html>
